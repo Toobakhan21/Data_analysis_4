@@ -1,0 +1,106 @@
+---
+title: "Project_4 markdown"
+author: "Tooba Khan"
+date: "5/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Q.1 Import the data from machine
+
+```{r lab3dataset}
+lab3dataset <- read.csv("C:/Users/WS-User/Desktop/Tooba/Business Decision Analysis/CIND123_ R Studio/Module 1/lab3dataset.csv", header = F, stringsAsFactors = F, na.strings = c("", "NA"))
+```
+
+Q.2 Display the first 6 rows of the lab3dataset using the head() function
+
+```{r}
+head(lab3dataset)
+```
+
+Q.3 Give proper names to each column using the names() function. Going forward, the
+exercise will use the following names: ID, Fname, Lname, Email, Gender, Country,
+Amount, Date.
+
+```{r}
+names(lab3dataset) <- c("ID","Fname", "Lname", "Email", "Gender", "Country", "Amount", "Date")
+```
+
+Q.4 Use the str() function to see more information about each column.
+
+```{r}
+str(lab3dataset)
+```
+
+Q.5 Find out how many different countries are there in the dataset by using the unique()
+function. You might need to remove the NA values before counting the number of unique
+countries.
+
+```{r}
+unique(lab3dataset$Country, na.rm = T)
+```
+
+Q.6 Count the number of Females under the Gender column. You can use the sum()
+function or a combination of length() and which() functions
+
+```{r}
+length(which(lab3dataset$Gender == 'Female'))
+sum(lab3dataset$Gender == 'Female', na.rm = T)
+```
+
+Q.7 Count the number of NAs under the Gender column.
+
+```{r}
+length(which(is.na(lab3dataset$Gender)))
+sum(is.na(lab3dataset$Gender))
+```
+
+Q.8 Preparing a working dataset 
+1. Clean the data by:
+• Removing clients who have NA as their country.
+• Converting the column with dollar values to numeric values.
+• Converting the Date column to data type date.
+
+```{r}
+lab3dataset <- lab3dataset[!is.na(lab3dataset$Country),]
+lab3dataset$Amount <- as.numeric(gsub("[$,]","", lab3dataset$Amount))
+lab3dataset$Date <- as.Date(lab3dataset$Date, "%m/%d/%Y")
+head(lab3dataset)
+```
+
+2. Identify the earliest date in the dataset and calculate the number of days passed for
+each observation. Insert these values as a new column to the data frame.
+
+```{r}
+lab3dataset$Days <- as.numeric(lab3dataset$Date - min(lab3dataset$Date))
+head(lab3dataset)
+```
+
+3. Create an additional column then populate it with a numeric indicator where emails
+end with .gov, .org, or .net get 1 and the rest get 0.
+
+```{r}
+lab3dataset$IndEmail <- 0
+lab3dataset$IndEmail[grep(".gov", lab3dataset$Email)] <- 1
+lab3dataset$IndEmail[grep(".org", lab3dataset$Email)] <- 1
+lab3dataset$IndEmail[grep(".net", lab3dataset$Email)] <- 1
+head(lab3dataset)
+```
+
+4. Check if the calculated number of days and the email indicator can be used
+to explain the amount column.
+
+```{r}
+lma <- lm(lab3dataset$Amount ~ lab3dataset$Days + lab3dataset$IndEmail)
+summary(lma)
+```
+
